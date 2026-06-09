@@ -1,0 +1,14 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Notification Service API
+            description: |
+                Read-only API for monitoring notification delivery.
+
+                This service primarily runs as an AMQP consumer.
+                HTTP endpoints expose operational visibility.
+            version: 1.0.0
+    areas:
+        default:
+            path_patterns:
+                - ^/(?!api/doc)

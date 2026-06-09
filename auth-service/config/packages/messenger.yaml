@@ -1,0 +1,30 @@
+framework:
+    messenger:
+        default_bus: command.bus
+
+        buses:
+            command.bus:
+                middleware: []
+            query.bus:
+                middleware: []
+
+        transports:
+            events:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: messenger.transport.symfony_serializer
+                retry_strategy:
+                    max_retries: 3
+                    delay: 500        # 1st retry after 500ms
+                    multiplier: 2     # 2nd → 1s, 3rd → 2s
+                    max_delay: 10000  # cap at 10s
+                options:
+                    exchange:
+                        name: auth.events
+                        type: topic
+                        default_publish_routing_key: user.registered
+                    queues:
+                        auth_events:
+                            binding_keys: ['user.#']
+
+        routing:
+            App\User\Infrastructure\Messaging\Message\UserRegisteredMessage: events

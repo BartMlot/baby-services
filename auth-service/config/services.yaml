@@ -1,0 +1,30 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            $commandBus: '@command.bus'
+            $queryBus: '@query.bus'
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Kernel.php'
+
+    App\User\Application\Command\RegisterUser\RegisterUserHandler:
+        tags:
+            - { name: messenger.message_handler, bus: command.bus }
+
+    App\User\Application\Query\LoginUser\LoginUserQueryHandler:
+        tags:
+            - { name: messenger.message_handler, bus: query.bus }
+
+    App\User\Application\Port\PasswordHasherPort:
+        alias: App\User\Infrastructure\Security\SymfonyPasswordHasher
+
+    App\User\Application\Port\EventPublisherPort:
+        alias: App\User\Infrastructure\Messaging\MessengerEventPublisher
+
+    App\User\Domain\Repository\UserRepositoryInterface:
+        alias: App\User\Infrastructure\Persistence\DoctrineUserRepository

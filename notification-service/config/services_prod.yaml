@@ -1,0 +1,12 @@
+services:
+    App\Notification\Infrastructure\Channel\SesEmailChannel:
+        arguments:
+            $mailer: '@app.mailer.ses'
+            $from: '%env(SES_FROM)%'
+        tags: ['notification.channel']
+
+    App\Notification\Infrastructure\Channel\TwilioSmsChannel:
+        arguments:
+            $fromNumber: '%env(TWILIO_FROM_NUMBER)%'
+            $twilio: '@twilio.client'
+        tags: ['notification.channel']

@@ -1,0 +1,47 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Kernel.php'
+
+    App\Notification\Application\Port\NotificationLogRepositoryPort:
+        alias: App\Notification\Infrastructure\Persistence\DoctrineNotificationLogRepository
+
+    App\Notification\Application\Service\NotificationDispatcher:
+        arguments:
+            $channels: !tagged_iterator notification.channel
+
+    # ── Per-provider mailer instances ─────────────────────────────────────────
+    # Each wraps a transport created directly from its DSN string.
+
+    app.transport.mailtrap:
+        class: Symfony\Component\Mailer\Transport\TransportInterface
+        factory: ['@mailer.transport_factory', 'fromString']
+        arguments: ['%env(MAILTRAP_DSN)%']
+
+    app.mailer.mailtrap:
+        class: Symfony\Component\Mailer\Mailer
+        autowire: false
+        arguments: ['@app.transport.mailtrap']
+
+    app.transport.ses:
+        class: Symfony\Component\Mailer\Transport\TransportInterface
+        factory: ['@mailer.transport_factory', 'fromString']
+        arguments: ['%env(SES_DSN)%']
+
+    app.mailer.ses:
+        class: Symfony\Component\Mailer\Mailer
+        autowire: false
+        arguments: ['@app.transport.ses']
+
+    # ── Twilio client ─────────────────────────────────────────────────────────
+    twilio.client:
+        class: Twilio\Rest\Client
+        arguments:
+            $username: '%env(TWILIO_ACCOUNT_SID)%'
+            $password: '%env(TWILIO_AUTH_TOKEN)%'

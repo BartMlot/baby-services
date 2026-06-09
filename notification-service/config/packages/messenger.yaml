@@ -1,0 +1,47 @@
+framework:
+    messenger:
+        failure_transport: failed
+
+        transports:
+            # -------------------------------------------------------
+            # Main consumer — auth.events / user.registered
+            # -------------------------------------------------------
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: App\Notification\Infrastructure\Messaging\Serializer\AmqpMessageSerializer
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000        # 1st retry after 1s
+                    multiplier: 2      # 2nd → 2s, 3rd → 4s
+                    max_delay: 60000   # cap at 60s
+                options:
+                    exchange:
+                        name: auth.events
+                        type: topic
+                    queues:
+                        notification_queue:
+                            binding_keys: ['user.registered']
+                            arguments:
+                                # After Symfony gives up (max_retries exceeded),
+                                # RabbitMQ routes nacked messages to the DLX.
+                                x-dead-letter-exchange: notification.dlx
+                                x-dead-letter-routing-key: notification.dead
+
+            # -------------------------------------------------------
+            # Dead Letter Queue — messages that failed all retries
+            # Inspect:  bin/console messenger:failed:show
+            # Retry:    bin/console messenger:failed:retry
+            # Remove:   bin/console messenger:failed:remove <id>
+            # -------------------------------------------------------
+            failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                serializer: App\Notification\Infrastructure\Messaging\Serializer\AmqpMessageSerializer
+                options:
+                    exchange:
+                        name: notification.dlx
+                        type: direct
+                    queues:
+                        notification_dead:
+                            binding_keys: ['notification.dead']
+                            arguments:
+                                x-message-ttl: 604800000  # auto-expire after 7 days (ms)

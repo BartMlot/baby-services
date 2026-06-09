@@ -1,0 +1,62 @@
+services:
+  auth-service:
+    build: .
+    ports:
+      - "8001:8000"
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      APP_ENV: dev
+      APP_SECRET: "change-me-in-production"
+      DATABASE_URL: "postgresql://auth_user:auth_pass@postgres-auth:5432/auth?serverVersion=15&charset=utf8"
+      MESSENGER_TRANSPORT_DSN: "amqp://guest:guest@rabbitmq:5672/%2f"
+      JWT_SECRET_KEY: "%kernel.project_dir%/config/jwt/private.pem"
+      JWT_PUBLIC_KEY: "%kernel.project_dir%/config/jwt/public.pem"
+      JWT_PASSPHRASE: ""
+      JWT_TOKEN_TTL: "3600"
+    networks:
+      - platform_net
+
+  postgres-auth:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - platform_net
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - platform_net
+
+volumes:
+  postgres_auth_data:
+  rabbitmq_data:
+
+networks:
+  platform_net:
+    name: platform_net
