@@ -6,9 +6,10 @@ namespace App\Notification\Application\Service;
 
 use App\Notification\Application\DTO\NotificationContext;
 use App\Notification\Application\Port\NotificationChannelInterface;
+use App\Notification\Application\Port\NotificationDispatcherPort;
 use Psr\Log\LoggerInterface;
 
-final class NotificationDispatcher
+final class NotificationDispatcher implements NotificationDispatcherPort
 {
     /** @param iterable<NotificationChannelInterface> $channels */
     public function __construct(

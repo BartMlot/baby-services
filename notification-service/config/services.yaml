@@ -12,6 +12,9 @@ services:
     App\Notification\Application\Port\NotificationLogRepositoryPort:
         alias: App\Notification\Infrastructure\Persistence\DoctrineNotificationLogRepository
 
+    App\Notification\Application\Port\NotificationDispatcherPort:
+        alias: App\Notification\Application\Service\NotificationDispatcher
+
     App\Notification\Application\Service\NotificationDispatcher:
         arguments:
             $channels: !tagged_iterator notification.channel

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Notification\Application\Handler;
 
 use App\Notification\Application\DTO\NotificationContext;
+use App\Notification\Application\Port\NotificationDispatcherPort;
 use App\Notification\Application\Port\NotificationLogRepositoryPort;
-use App\Notification\Application\Service\NotificationDispatcher;
 use App\Notification\Domain\Entity\NotificationLog;
 use App\Notification\Domain\Enum\NotificationType;
 use App\Notification\Domain\ValueObject\NotificationId;
@@ -14,7 +14,7 @@ use App\Notification\Domain\ValueObject\NotificationId;
 final class SendWelcomeNotificationHandler
 {
     public function __construct(
-        private readonly NotificationDispatcher $dispatcher,
+        private readonly NotificationDispatcherPort $dispatcher,
         private readonly NotificationLogRepositoryPort $logRepository,
     ) {}
 

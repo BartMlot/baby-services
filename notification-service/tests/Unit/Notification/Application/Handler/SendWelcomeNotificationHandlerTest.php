@@ -6,21 +6,21 @@ namespace App\Tests\Unit\Notification\Application\Handler;
 
 use App\Notification\Application\DTO\NotificationContext;
 use App\Notification\Application\Handler\SendWelcomeNotificationHandler;
+use App\Notification\Application\Port\NotificationDispatcherPort;
 use App\Notification\Application\Port\NotificationLogRepositoryPort;
-use App\Notification\Application\Service\NotificationDispatcher;
 use App\Notification\Domain\Entity\NotificationLog;
 use App\Notification\Domain\Enum\NotificationType;
 use PHPUnit\Framework\TestCase;
 
 final class SendWelcomeNotificationHandlerTest extends TestCase
 {
-    private NotificationDispatcher $dispatcher;
+    private NotificationDispatcherPort $dispatcher;
     private NotificationLogRepositoryPort $logRepository;
     private SendWelcomeNotificationHandler $handler;
 
     protected function setUp(): void
     {
-        $this->dispatcher = $this->createMock(NotificationDispatcher::class);
+        $this->dispatcher = $this->createMock(NotificationDispatcherPort::class);
         $this->logRepository = $this->createMock(NotificationLogRepositoryPort::class);
         $this->handler = new SendWelcomeNotificationHandler($this->dispatcher, $this->logRepository);
     }
